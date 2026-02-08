@@ -320,6 +320,7 @@
       transition: all 0.2s;
     }
     .overview-card:hover { border-color: var(--purple); transform: translateY(-2px); }
+    .timeline-month:hover { border-color: var(--purple) !important; background: var(--surface2) !important; }
     .overview-card h3 {
       font-size: 13px;
       color: var(--text-dim);
@@ -580,36 +581,52 @@
       <h3 style="margin-bottom: 12px;">⚠️ Overdue & Upcoming</h3>
       <div id="urgentTasks" style="margin-bottom: 20px;"></div>
       
-      <h3 style="margin-bottom: 12px;">📅 Timeline</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px;">
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+      <h3 style="margin-bottom: 12px;">📅 Timeline <span style="font-size: 12px; color: var(--text-dim); font-weight: 400;">(tap a month)</span></h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px;" id="timelineGrid">
+        <div class="timeline-month" data-month="feb" style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
           <div style="font-weight: 700; color: var(--purple); font-size: 14px;">Feb</div>
           <div style="font-size: 10px; color: var(--text-dim);">Foundation</div>
+          <div class="month-task-count" style="font-size: 11px; color: var(--teal); margin-top: 4px;"></div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+        <div class="timeline-month" data-month="mar" style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
           <div style="font-weight: 700; color: var(--purple); font-size: 14px;">Mar</div>
           <div style="font-size: 10px; color: var(--text-dim);">Content</div>
+          <div class="month-task-count" style="font-size: 11px; color: var(--teal); margin-top: 4px;"></div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+        <div class="timeline-month" data-month="apr" style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
           <div style="font-weight: 700; color: var(--purple); font-size: 14px;">Apr</div>
           <div style="font-size: 10px; color: var(--text-dim);">Finalize</div>
+          <div class="month-task-count" style="font-size: 11px; color: var(--teal); margin-top: 4px;"></div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+        <div class="timeline-month" data-month="may" style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
           <div style="font-weight: 700; color: var(--teal); font-size: 14px;">May</div>
           <div style="font-size: 10px; color: var(--text-dim);">Launch</div>
+          <div class="month-task-count" style="font-size: 11px; color: var(--teal); margin-top: 4px;"></div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+        <div class="timeline-month" data-month="jun" style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
           <div style="font-weight: 700; color: var(--teal); font-size: 14px;">Jun</div>
           <div style="font-size: 10px; color: var(--text-dim);">Sales</div>
+          <div class="month-task-count" style="font-size: 11px; color: var(--teal); margin-top: 4px;"></div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+        <div class="timeline-month" data-month="jul,aug,sep,oct" style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
           <div style="font-weight: 700; color: var(--orange); font-size: 14px;">Jul-Oct</div>
           <div style="font-size: 10px; color: var(--text-dim);">Build</div>
+          <div class="month-task-count" style="font-size: 11px; color: var(--teal); margin-top: 4px;"></div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--green); border-radius: 8px; padding: 10px; text-align: center;">
+        <div class="timeline-month" data-month="nov" style="background: var(--surface); border: 1px solid var(--green); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
           <div style="font-weight: 700; color: var(--green); font-size: 14px;">Nov</div>
           <div style="font-size: 10px; color: var(--text-dim);">🎄 OPEN!</div>
+          <div class="month-task-count" style="font-size: 11px; color: var(--teal); margin-top: 4px;"></div>
         </div>
+      </div>
+      
+      <!-- Month Detail View -->
+      <div id="monthDetail" style="display: none; margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 id="monthDetailTitle" style="font-size: 18px;"></h3>
+          <button class="btn btn-secondary btn-sm" onclick="closeMonthDetail()">← Back to Overview</button>
+        </div>
+        <div id="monthDetailTasks"></div>
       </div>
     </div>
     
@@ -831,6 +848,7 @@
       
       updateStats();
       renderUrgent();
+      updateTimelineCounts();
     }
     
     function renderTask(task) {
@@ -1063,6 +1081,76 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeModal();
     });
+    
+    // Timeline month clicks
+    document.querySelectorAll('.timeline-month').forEach(el => {
+      el.addEventListener('click', () => showMonthDetail(el.dataset.month));
+      el.addEventListener('mouseenter', () => el.style.transform = 'translateY(-2px)');
+      el.addEventListener('mouseleave', () => el.style.transform = 'translateY(0)');
+    });
+    
+    function showMonthDetail(monthStr) {
+      const months = monthStr.split(',');
+      const monthNames = months.map(m => MONTHS[m]?.name || m).join(' - ');
+      const monthTasks = tasks.filter(t => months.includes(t.month));
+      
+      document.getElementById('monthDetailTitle').textContent = `📅 ${monthNames} Tasks`;
+      
+      // Group by team
+      const byTeam = {};
+      Object.keys(TEAMS).forEach(t => byTeam[t] = []);
+      monthTasks.forEach(t => {
+        if (byTeam[t.team]) byTeam[t.team].push(t);
+      });
+      
+      let html = '';
+      Object.keys(TEAMS).forEach(teamKey => {
+        const teamTasks = byTeam[teamKey];
+        if (teamTasks.length === 0) return;
+        
+        const team = TEAMS[teamKey];
+        const done = teamTasks.filter(t => t.done).length;
+        
+        html += `
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+              <span style="font-size: 20px;">${team.icon}</span>
+              <span style="font-weight: 600;">${team.name}</span>
+              <span style="color: var(--text-dim); font-size: 13px;">(${done}/${teamTasks.length})</span>
+            </div>
+        `;
+        
+        teamTasks.forEach(task => {
+          html += renderTask(task);
+        });
+        
+        html += '</div>';
+      });
+      
+      if (html === '') {
+        html = '<div style="color: var(--text-dim); text-align: center; padding: 40px;">No tasks scheduled for this month yet.</div>';
+      }
+      
+      document.getElementById('monthDetailTasks').innerHTML = html;
+      document.getElementById('monthDetail').style.display = 'block';
+      document.getElementById('monthDetail').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function closeMonthDetail() {
+      document.getElementById('monthDetail').style.display = 'none';
+    }
+    
+    function updateTimelineCounts() {
+      document.querySelectorAll('.timeline-month').forEach(el => {
+        const months = el.dataset.month.split(',');
+        const monthTasks = tasks.filter(t => months.includes(t.month));
+        const done = monthTasks.filter(t => t.done).length;
+        const countEl = el.querySelector('.month-task-count');
+        if (countEl) {
+          countEl.textContent = monthTasks.length > 0 ? `${done}/${monthTasks.length}` : '';
+        }
+      });
+    }
     
     // Init
     loadTasks();
