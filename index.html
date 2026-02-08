@@ -57,6 +57,7 @@
       --orange: #f97316;
       --red: #ef4444;
       --blue: #3b82f6;
+      --pink: #ec4899;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -66,7 +67,6 @@
       min-height: 100vh;
     }
     
-    /* Splash */
     #splash {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -82,88 +82,93 @@
     
     .header {
       background: linear-gradient(135deg, var(--purple), var(--teal));
-      padding: 24px 20px;
+      padding: 20px;
       text-align: center;
     }
-    .header h1 { font-size: 24px; font-weight: 800; }
-    .header p { opacity: 0.9; font-size: 14px; margin-top: 4px; }
+    .header h1 { font-size: 22px; font-weight: 800; }
+    .header p { opacity: 0.9; font-size: 13px; margin-top: 4px; }
     
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
     
-    /* Month Tabs */
-    .month-tabs {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 16px 0;
-      margin-bottom: 20px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .month-tab {
-      padding: 12px 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text-dim);
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-    .month-tab:hover { border-color: var(--purple); }
-    .month-tab.active {
-      background: linear-gradient(135deg, var(--purple), var(--teal));
-      color: #000;
-      border-color: transparent;
-    }
-    .month-tab.current { box-shadow: 0 0 0 2px var(--teal); }
-    
-    /* Progress Overview */
-    .progress-overview {
+    /* Team Tabs */
+    .team-tabs {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 24px;
     }
-    .progress-card {
+    .team-tab {
+      padding: 20px 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .team-tab:hover { border-color: var(--purple); transform: translateY(-2px); }
+    .team-tab.active { border-color: var(--teal); background: rgba(6,214,160,0.1); }
+    .team-tab .icon { font-size: 32px; margin-bottom: 8px; }
+    .team-tab .name { font-weight: 700; font-size: 14px; }
+    .team-tab .count { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+    
+    /* Progress Bar */
+    .progress-section {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-    }
-    .progress-card .value {
-      font-size: 32px;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--purple), var(--teal));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .progress-card .label { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-    
-    /* Month Content */
-    .month-content { display: none; }
-    .month-content.active { display: block; }
-    
-    .month-header {
-      background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(6,214,160,0.15));
-      border: 1px solid rgba(168,85,247,0.3);
-      border-radius: 12px;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
-    .month-header h2 { font-size: 24px; margin-bottom: 8px; }
-    .month-header .theme { color: var(--teal); font-size: 16px; }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .progress-bar {
+      height: 12px;
+      background: var(--surface2);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), var(--teal));
+      border-radius: 6px;
+      transition: width 0.3s;
+    }
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
     
-    /* Department Sections */
-    .dept-section {
+    /* Team Content */
+    .team-content { display: none; }
+    .team-content.active { display: block; }
+    
+    .team-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .team-header .icon { font-size: 48px; }
+    .team-header h2 { font-size: 24px; }
+    .team-header .desc { color: var(--text-dim); font-size: 14px; }
+    
+    /* Month Sections */
+    .month-section {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       margin-bottom: 16px;
       overflow: hidden;
     }
-    .dept-header {
+    .month-header {
       padding: 16px 20px;
       background: var(--surface2);
       display: flex;
@@ -171,16 +176,14 @@
       align-items: center;
       cursor: pointer;
     }
-    .dept-header h3 { font-size: 16px; display: flex; align-items: center; gap: 10px; }
-    .dept-header .count {
-      background: rgba(168,85,247,0.2);
-      color: var(--purple);
+    .month-header h3 { font-size: 16px; }
+    .month-header .badge {
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
     }
-    .dept-tasks { padding: 16px 20px; }
+    .month-tasks { padding: 16px 20px; }
     
     /* Task Item */
     .task-item {
@@ -204,7 +207,9 @@
       justify-content: center;
       flex-shrink: 0;
       transition: all 0.2s;
+      font-size: 14px;
     }
+    .task-checkbox:hover { border-color: var(--teal); }
     .task-checkbox.done {
       background: var(--green);
       border-color: var(--green);
@@ -216,7 +221,6 @@
     .task-desc { font-size: 13px; color: var(--text-dim); }
     .task-meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
     
-    /* Priority Badges */
     .badge {
       padding: 4px 10px;
       border-radius: 20px;
@@ -225,40 +229,40 @@
     }
     .badge-high { background: rgba(239,68,68,0.2); color: var(--red); }
     .badge-medium { background: rgba(249,115,22,0.2); color: var(--orange); }
-    .badge-low { background: rgba(34,197,94,0.2); color: var(--green); }
     .badge-done { background: rgba(34,197,94,0.2); color: var(--green); }
-    .badge-dept { background: rgba(59,130,246,0.2); color: var(--blue); }
+    .badge-month { background: rgba(168,85,247,0.2); color: var(--purple); }
     
-    /* Week Indicators */
-    .week-section {
+    /* Overview Tab */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
       margin-bottom: 24px;
     }
-    .week-header {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--purple);
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    /* Goals Box */
-    .goals-box {
-      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(6,214,160,0.1));
-      border: 1px solid rgba(34,197,94,0.3);
+    .overview-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      margin-bottom: 20px;
     }
-    .goals-box h3 { color: var(--green); margin-bottom: 12px; font-size: 16px; }
-    .goals-box ul { padding-left: 20px; }
-    .goals-box li { margin-bottom: 8px; color: var(--text-dim); }
+    .overview-card h3 {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .overview-card .value {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
     
-    /* Mobile */
-    @media (max-width: 600px) {
-      .month-tabs { padding: 12px 0; }
-      .month-tab { padding: 10px 16px; font-size: 14px; }
-      .progress-overview { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 768px) {
+      .team-tabs { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .team-tab { padding: 16px 12px; }
+      .team-tab .icon { font-size: 24px; }
+      .team-tab .name { font-size: 12px; }
     }
   </style>
 </head>
@@ -271,656 +275,668 @@
   
   <div class="header">
     <h1>📅 Pre-Season Calendar 2026</h1>
-    <p>Goals & Expectations • Feb - Nov</p>
+    <p>Team Roadmaps • Feb - Nov</p>
   </div>
   
   <div class="container">
-    <!-- Progress Overview -->
-    <div class="progress-overview">
-      <div class="progress-card">
-        <div class="value" id="totalTasks">47</div>
-        <div class="label">Total Tasks</div>
+    <!-- Team Selection -->
+    <div class="team-tabs">
+      <div class="team-tab active" data-team="overview">
+        <div class="icon">📊</div>
+        <div class="name">Overview</div>
+        <div class="count">All Teams</div>
       </div>
-      <div class="progress-card">
-        <div class="value" id="completedTasks">8</div>
-        <div class="label">Completed</div>
+      <div class="team-tab" data-team="marketing">
+        <div class="icon">📣</div>
+        <div class="name">Marketing</div>
+        <div class="count" id="marketing-count">12 tasks</div>
       </div>
-      <div class="progress-card">
-        <div class="value" id="progressPercent">17%</div>
-        <div class="label">Progress</div>
+      <div class="team-tab" data-team="warehouse">
+        <div class="icon">🏭</div>
+        <div class="name">Warehouse</div>
+        <div class="count" id="warehouse-count">10 tasks</div>
       </div>
-      <div class="progress-card">
-        <div class="value" id="daysToSeason">287</div>
-        <div class="label">Days to Opening</div>
+      <div class="team-tab" data-team="fourthwall">
+        <div class="icon">🎨</div>
+        <div class="name">4th Wall Digital</div>
+        <div class="count" id="fourthwall-count">8 tasks</div>
+      </div>
+      <div class="team-tab" data-team="bob">
+        <div class="icon">👔</div>
+        <div class="name">Bob</div>
+        <div class="count" id="bob-count">6 tasks</div>
       </div>
     </div>
     
-    <!-- Month Tabs -->
-    <div class="month-tabs">
-      <div class="month-tab current active" data-month="feb">Feb</div>
-      <div class="month-tab" data-month="mar">Mar</div>
-      <div class="month-tab" data-month="apr">Apr</div>
-      <div class="month-tab" data-month="may">May</div>
-      <div class="month-tab" data-month="jun">Jun</div>
-      <div class="month-tab" data-month="jul">Jul</div>
-      <div class="month-tab" data-month="aug">Aug</div>
-      <div class="month-tab" data-month="sep">Sep</div>
-      <div class="month-tab" data-month="oct">Oct</div>
-      <div class="month-tab" data-month="nov">Nov</div>
+    <!-- Progress Section -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <span style="font-weight: 600;">Overall Progress</span>
+        <span id="progressPercent" style="color: var(--teal); font-weight: 700;">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+      </div>
+      <div class="progress-stats">
+        <span><span id="completedTasks">0</span> of <span id="totalTasks">36</span> tasks completed</span>
+        <span><span id="daysToSeason">287</span> days to opening</span>
+      </div>
     </div>
     
-    <!-- FEBRUARY -->
-    <div class="month-content active" id="month-feb">
-      <div class="month-header">
-        <h2>🎭 February 2026</h2>
-        <div class="theme">Foundation Building & Character Development</div>
-      </div>
-      
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Complete DJ Polar Ice avatar development (photo shoot, lip-sync, voice)</li>
-          <li>Finalize Pixel Penguin character design</li>
-          <li>Design Oklahoma City park layout</li>
-          <li>Begin tent experience enhancement designs</li>
-          <li>Organize all marketing assets</li>
-        </ul>
-      </div>
-      
-      <div class="dept-section">
-        <div class="dept-header">
-          <h3>🎨 Creative / Branding</h3>
-          <span class="count">6 tasks</span>
+    <!-- OVERVIEW -->
+    <div class="team-content active" id="team-overview">
+      <div class="overview-grid">
+        <div class="overview-card">
+          <h3>📣 Marketing</h3>
+          <div class="value" id="ov-marketing">0/12</div>
         </div>
-        <div class="dept-tasks">
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">DJ Polar Ice Mascot Photo Shoot</div>
-              <div class="task-desc">Professional photos for facial animation & marketing</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
+        <div class="overview-card">
+          <h3>🏭 Warehouse</h3>
+          <div class="value" id="ov-warehouse">0/10</div>
+        </div>
+        <div class="overview-card">
+          <h3>🎨 4th Wall Digital</h3>
+          <div class="value" id="ov-fourthwall">0/8</div>
+        </div>
+        <div class="overview-card">
+          <h3>👔 Bob (Approvals)</h3>
+          <div class="value" id="ov-bob">0/6</div>
+        </div>
+      </div>
+      
+      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,214,160,0.1)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <h3 style="margin-bottom: 16px;">🎯 2026 Season Investment</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+          <div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--purple);">$38,000</div>
+            <div style="font-size: 13px; color: var(--text-dim);">4th Wall Digital</div>
           </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Lip-Sync & Gesture Animation System</div>
-              <div class="task-desc">Create phoneme library, gestures for English/Spanish</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
+          <div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--teal);">$252,000</div>
+            <div style="font-size: 13px; color: var(--text-dim);">Materials (8 venues)</div>
           </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Bilingual Voice Creation</div>
-              <div class="task-desc">Audition voice actors, record core phrases</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
+          <div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--green);">$290,000</div>
+            <div style="font-size: 13px; color: var(--text-dim);">Total Investment</div>
           </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Pixel Penguin Character Design</div>
-              <div class="task-desc">5-7 concept variations, final 3D model</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
+          <div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--yellow);">600-800%</div>
+            <div style="font-size: 13px; color: var(--text-dim);">Projected ROI</div>
           </div>
-          <div class="task-item">
+        </div>
+      </div>
+      
+      <h3 style="margin-bottom: 16px;">📅 Timeline Overview</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-weight: 700; color: var(--purple);">Feb</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Foundation</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-weight: 700; color: var(--purple);">Mar</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Content</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-weight: 700; color: var(--purple);">Apr</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Integration</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-weight: 700; color: var(--teal);">May</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Launch</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-weight: 700; color: var(--teal);">Jun</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Final Prep</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-weight: 700; color: var(--orange);">Jul-Oct</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Build</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--green); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-weight: 700; color: var(--green);">Nov</div>
+          <div style="font-size: 11px; color: var(--text-dim);">🎄 OPEN!</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- MARKETING -->
+    <div class="team-content" id="team-marketing">
+      <div class="team-header">
+        <div class="icon">📣</div>
+        <div>
+          <h2>Marketing</h2>
+          <div class="desc">Social media, content, campaigns, website</div>
+        </div>
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 February</h3>
+          <span class="badge badge-month">Foundation</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="marketing">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">Marketing Asset Organization</div>
-              <div class="task-desc">Digital asset library, file naming conventions</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
+              <div class="task-desc">Create digital asset library, establish file naming conventions</div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
             </div>
           </div>
-          <div class="task-item">
+          <div class="task-item" data-team="marketing">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">Website Branding Integration</div>
-              <div class="task-desc">Update website with new characters & brand kit</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
+              <div class="task-desc">Update website with new characters, brand kit, DJ Polar Ice, Pixel Penguin</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
             </div>
           </div>
         </div>
       </div>
       
-      <div class="dept-section">
-        <div class="dept-header">
-          <h3>🏗️ Operations / Build</h3>
-          <span class="count">3 tasks</span>
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 March</h3>
+          <span class="badge badge-month">Content Creation</span>
         </div>
-        <div class="dept-tasks">
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">OKC Park Layout Design</div>
-              <div class="task-desc">Traffic flow, emergency exits, tent positioning, show roadmap</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Operations</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Themed Area Development (Returning Venues)</div>
-              <div class="task-desc">Optimize prop placement, audit existing inventory</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Operations</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Tent Experience Enhancement Design</div>
-              <div class="task-desc">Grand entrance pixels, rolling shelving, popcorn carts</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Operations</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="dept-section">
-        <div class="dept-header">
-          <h3>💻 Technology</h3>
-          <span class="count">1 task</span>
-        </div>
-        <div class="dept-tasks">
-          <div class="task-item">
-            <div class="task-checkbox done" onclick="toggleTask(this)">✓</div>
-            <div class="task-content">
-              <div class="task-title done">Mobile App Development</div>
-              <div class="task-desc">✅ LIVE at thelightparkapp.com - Audio sync, FPP integration, Fun Zone</div>
-              <div class="task-meta">
-                <span class="badge badge-done">DONE</span>
-                <span class="badge badge-dept">Technology</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- MARCH -->
-    <div class="month-content" id="month-mar">
-      <div class="month-header">
-        <h2>📺 March 2026</h2>
-        <div class="theme">Content Creation & Digital Platform Development</div>
-      </div>
-      
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Launch YouTube channel (private for review)</li>
-          <li>Develop festival map prototypes for all 8 venues</li>
-          <li>Write DJ Polar Ice storybook concept</li>
-          <li>Create theme song/jingle</li>
-          <li>Write character dialogue & bumper scripts</li>
-        </ul>
-      </div>
-      
-      <div class="dept-section">
-        <div class="dept-header">
-          <h3>📹 Content Creation</h3>
-          <span class="count">5 tasks</span>
-        </div>
-        <div class="dept-tasks">
-          <div class="task-item">
+        <div class="month-tasks">
+          <div class="task-item" data-team="marketing">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">YouTube Channel Setup</div>
-              <div class="task-desc">Create channel, branding, thumbnail templates (private initially)</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
+              <div class="task-desc">Create channel (private), branding, thumbnail templates</div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
             </div>
           </div>
-          <div class="task-item">
+          <div class="task-item" data-team="marketing">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">Festival Map Prototypes</div>
               <div class="task-desc">Site-specific maps for all 8 venues with sponsorship zones</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">DJ Polar Ice Storybook Concept</div>
-              <div class="task-desc">Origin story, teaser content for maps</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Theme Song / Jingle Creation</div>
-              <div class="task-desc">Compose memorable audio branding, instrumental & vocal versions</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Character Dialogue & Bumper Scripts</div>
-              <div class="task-desc">Between-song transitions, bilingual content</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- APRIL -->
-    <div class="month-content" id="month-apr">
-      <div class="month-header">
-        <h2>🔧 April 2026</h2>
-        <div class="theme">Integration & Finalization Phase</div>
-      </div>
       
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Import all bumper tracks into xLights</li>
-          <li>Finalize festival maps & get printing quotes</li>
-          <li>Complete branding audit across all materials</li>
-          <li>Final app testing & ticketing integration</li>
-          <li>Website branding final review</li>
-        </ul>
-      </div>
-      
-      <div class="dept-section">
-        <div class="dept-header">
-          <h3>🎯 Finalization Tasks</h3>
-          <span class="count">5 tasks</span>
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 April</h3>
+          <span class="badge badge-month">Finalization</span>
         </div>
-        <div class="dept-tasks">
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Bumper Track xLights Integration</div>
-              <div class="task-desc">Import all tracks, add theme song backgrounds, transition animations</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Production</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
+        <div class="month-tasks">
+          <div class="task-item" data-team="marketing">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">Festival Map Finalization & Printing</div>
-              <div class="task-desc">Complete all 8 venue maps, get domestic & overseas quotes</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Operations</span>
-              </div>
+              <div class="task-desc">Complete all 8 venue maps, get domestic & overseas printing quotes</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
             </div>
           </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Branding Consistency Audit</div>
-              <div class="task-desc">Review all graphics, colors, typography, character representations</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">App Finalization & Ticketing Test</div>
-              <div class="task-desc">All use cases confirmed, ticketing integration tested</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Technology</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
+          <div class="task-item" data-team="marketing">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">Website Final Review & Launch</div>
-              <div class="task-desc">Complete audit, verify all assets, final approval</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
+              <div class="task-desc">Complete audit of all pages, verify assets, final approval</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 May</h3>
+          <span class="badge badge-month">Public Launch</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="marketing">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Social Media Content Launch</div>
+              <div class="task-desc">Go live on YouTube, TikTok, Instagram. Monitor engagement daily.</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="marketing">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Early Bird Sales Planning</div>
+              <div class="task-desc">Pricing tiers, promotional packages, marketing materials for June launch</div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="marketing">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Viral Content Creation</div>
+              <div class="task-desc">Short viral sequences, @htown_frankie style content for organic reach</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 June</h3>
+          <span class="badge badge-month">Sales Launch</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="marketing">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Early Bird Ticket Sales Launch</div>
+              <div class="task-desc">Open ticket sales with promotional pricing</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="marketing">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">App Audio Content</div>
+              <div class="task-desc">Pre-arrival audio, queue entertainment, sponsorship segments</div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
             </div>
           </div>
         </div>
       </div>
     </div>
     
-    <!-- MAY -->
-    <div class="month-content" id="month-may">
-      <div class="month-header">
-        <h2>🚀 May 2026</h2>
-        <div class="theme">Public Launch & Production Phase</div>
-      </div>
-      
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Launch social media content (YouTube, TikTok, Instagram)</li>
-          <li>Begin tent improvement manufacturing</li>
-          <li>Plan early bird sales (June/July)</li>
-          <li>Start sequence uploads to all venues</li>
-          <li>Begin photo op area construction</li>
-          <li>Create viral content sequences</li>
-        </ul>
-      </div>
-      
-      <div class="dept-section">
-        <div class="dept-header">
-          <h3>🚀 Launch Tasks</h3>
-          <span class="count">6 tasks</span>
+    <!-- WAREHOUSE -->
+    <div class="team-content" id="team-warehouse">
+      <div class="team-header">
+        <div class="icon">🏭</div>
+        <div>
+          <h2>Warehouse / Operations</h2>
+          <div class="desc">Build, props, tent improvements, installations</div>
         </div>
-        <div class="dept-tasks">
-          <div class="task-item">
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 February</h3>
+          <span class="badge badge-month">Planning</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="warehouse">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
-              <div class="task-title">Social Media Content Launch</div>
-              <div class="task-desc">Go live on YouTube, TikTok, Instagram. Monitor engagement.</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
+              <div class="task-title">OKC Park Layout Design</div>
+              <div class="task-desc">Traffic flow, emergency exits, tent positioning, show roadmap</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
             </div>
           </div>
-          <div class="task-item">
+          <div class="task-item" data-team="warehouse">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Themed Area Development (Returning Venues)</div>
+              <div class="task-desc">Audit existing inventory, optimize prop placement for 7 venues</div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="warehouse">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Tent Experience Enhancement Design</div>
+              <div class="task-desc">Grand entrance pixel screens, rolling shelving, popcorn carts</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 April</h3>
+          <span class="badge badge-month">Procurement</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="warehouse">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Material Procurement Start</div>
+              <div class="task-desc">Order DJ booths ($60K), pixel signage ($8K), tent screens ($80K), displays ($40K)</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 May</h3>
+          <span class="badge badge-month">Manufacturing</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="warehouse">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">Tent Improvement Manufacturing</div>
-              <div class="task-desc">Pixel screens, rolling shelving, equipment carts</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Operations</span>
-              </div>
+              <div class="task-desc">Pixel screens, rolling shelving units, equipment carts</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
             </div>
           </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Early Bird Sales Planning</div>
-              <div class="task-desc">Pricing tiers, promotional packages, marketing materials</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Sequence Upload Process</div>
-              <div class="task-desc">Upload new & existing tracks to all venue props (continues through July)</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Production</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
+          <div class="task-item" data-team="warehouse">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
               <div class="task-title">Photo Op Area Construction</div>
               <div class="task-desc">Build backdrops, install lighting at all venues</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Operations</span>
-              </div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
             </div>
           </div>
-          <div class="task-item">
+          <div class="task-item" data-team="warehouse">
             <div class="task-checkbox" onclick="toggleTask(this)"></div>
             <div class="task-content">
-              <div class="task-title">Viral Content Creation</div>
-              <div class="task-desc">Short viral sequences for organic social media content</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
+              <div class="task-title">Sequence Upload to Venues</div>
+              <div class="task-desc">Upload new & existing tracks to all venue props (continues through July)</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    
-    <!-- JUNE -->
-    <div class="month-content" id="month-jun">
-      <div class="month-header">
-        <h2>🎯 June 2026</h2>
-        <div class="theme">Pre-Season Preparation</div>
       </div>
       
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Complete all 4th Wall Digital deliverables ($38K)</li>
-          <li>Finish all material procurement ($252K)</li>
-          <li>App audio content creation</li>
-          <li>Early bird ticket sales begin</li>
-        </ul>
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 July - October</h3>
+          <span class="badge badge-month">Build Season</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="warehouse">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Venue Installations</div>
+              <div class="task-desc">Deploy teams, install props, electrical & pixel testing at all 8 sites</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="warehouse">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Final System Testing</div>
+              <div class="task-desc">Full show testing, troubleshooting, QA at all venues</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 4TH WALL DIGITAL -->
+    <div class="team-content" id="team-fourthwall">
+      <div class="team-header">
+        <div class="icon">🎨</div>
+        <div>
+          <h2>4th Wall Digital</h2>
+          <div class="desc">Character development, animation, voice, creative</div>
+        </div>
       </div>
       
-      <div class="dept-section">
-        <div class="dept-header">
-          <h3>🎯 Final Prep Tasks</h3>
-          <span class="count">3 tasks</span>
-        </div>
-        <div class="dept-tasks">
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">App Audio Content Creation</div>
-              <div class="task-desc">Pre-arrival audio, queue entertainment, sponsorship segments</div>
-              <div class="task-meta">
-                <span class="badge badge-medium">MEDIUM</span>
-                <span class="badge badge-dept">Content</span>
-              </div>
-            </div>
+      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.1)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; color: var(--text-dim);">Contract Value</div>
+            <div style="font-size: 28px; font-weight: 700; color: var(--purple);">$38,000</div>
           </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">4th Wall Digital Completion</div>
-              <div class="task-desc">All character digital twins, content suite, brand identity system</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Creative</span>
-              </div>
-            </div>
-          </div>
-          <div class="task-item">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Early Bird Sales Launch</div>
-              <div class="task-desc">Open ticket sales with promotional pricing</div>
-              <div class="task-meta">
-                <span class="badge badge-high">HIGH</span>
-                <span class="badge badge-dept">Marketing</span>
-              </div>
-            </div>
+          <div style="text-align: right;">
+            <div style="font-size: 14px; color: var(--text-dim);">Deadline</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--teal);">June 2026</div>
           </div>
         </div>
       </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 February</h3>
+          <span class="badge badge-month">Character Dev</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">DJ Polar Ice Photo Shoot</div>
+              <div class="task-desc">Professional mascot photos for facial animation & marketing assets</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Lip-Sync & Gesture Animation</div>
+              <div class="task-desc">Phoneme library for English/Spanish, gesture animations</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Bilingual Voice Creation</div>
+              <div class="task-desc">Voice actor auditions, record core phrases English/Spanish</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Pixel Penguin Character Design</div>
+              <div class="task-desc">5-7 concept variations, final 3D model and rigging</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 March</h3>
+          <span class="badge badge-month">Content</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">DJ Polar Ice Storybook</div>
+              <div class="task-desc">Origin story narrative, teaser content for maps</div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Theme Song / Jingle</div>
+              <div class="task-desc">Compose memorable audio branding, instrumental & vocal versions</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Character Dialogue Scripts</div>
+              <div class="task-desc">Bumper track scripts, between-song transitions, bilingual</div>
+              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 April - June</h3>
+          <span class="badge badge-month">Delivery</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="fourthwall">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Complete Content Suite Delivery</div>
+              <div class="task-desc">All character digital twins, RVC voice & LoRA visual models, brand identity system</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
-    <!-- JULY through NOVEMBER (build/install phase) -->
-    <div class="month-content" id="month-jul">
-      <div class="month-header">
-        <h2>🔨 July 2026</h2>
-        <div class="theme">Build Season Begins</div>
+    <!-- BOB -->
+    <div class="team-content" id="team-bob">
+      <div class="team-header">
+        <div class="icon">👔</div>
+        <div>
+          <h2>Bob (Executive / Approvals)</h2>
+          <div class="desc">Final approvals, key decisions, vendor management</div>
+        </div>
       </div>
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Continue sequence uploads</li>
-          <li>Staff hiring begins</li>
-          <li>Venue prep work starts</li>
-        </ul>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 February</h3>
+          <span class="badge badge-month">Kickoff</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="bob">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Approve Pixel Penguin Final Design</div>
+              <div class="task-desc">Review 5-7 concepts, select final character design</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="bob">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Approve OKC Layout</div>
+              <div class="task-desc">Review traffic flow, emergency exits, tent positioning</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    
-    <div class="month-content" id="month-aug">
-      <div class="month-header">
-        <h2>🏗️ August 2026</h2>
-        <div class="theme">Build Season - Full Swing</div>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 April</h3>
+          <span class="badge badge-month">Reviews</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="bob">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Branding Consistency Sign-off</div>
+              <div class="task-desc">Final review of all graphics, colors, character representations</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="bob">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Approve Festival Map Printing</div>
+              <div class="task-desc">Review quotes, select vendor (domestic vs overseas)</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+          <div class="task-item" data-team="bob">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Website Launch Approval</div>
+              <div class="task-desc">Final sign-off on updated website with new branding</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Install teams deployed to venues</li>
-          <li>Prop placement begins</li>
-          <li>Staff training development</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="month-content" id="month-sep">
-      <div class="month-header">
-        <h2>⚡ September 2026</h2>
-        <div class="theme">Build Season - Push Phase</div>
-      </div>
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Major prop installations</li>
-          <li>Electrical & pixel testing</li>
-          <li>Staff hiring finalized</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="month-content" id="month-oct">
-      <div class="month-header">
-        <h2>🎃 October 2026</h2>
-        <div class="theme">Final Build & Testing</div>
-      </div>
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>Complete all installations</li>
-          <li>Full system testing</li>
-          <li>Staff training at venues</li>
-          <li>Marketing push - Halloween & Thanksgiving</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="month-content" id="month-nov">
-      <div class="month-header">
-        <h2>🎄 November 2026</h2>
-        <div class="theme">SHOW TIME!</div>
-      </div>
-      <div class="goals-box">
-        <h3>🎯 Monthly Goals</h3>
-        <ul>
-          <li>🎉 OPENING NIGHT (Late November)</li>
-          <li>All systems go</li>
-          <li>Guest experience optimization</li>
-          <li>Real-time performance monitoring</li>
-        </ul>
+      
+      <div class="month-section">
+        <div class="month-header">
+          <h3>📅 May - June</h3>
+          <span class="badge badge-month">Launch</span>
+        </div>
+        <div class="month-tasks">
+          <div class="task-item" data-team="bob">
+            <div class="task-checkbox" onclick="toggleTask(this)"></div>
+            <div class="task-content">
+              <div class="task-title">Approve Early Bird Pricing</div>
+              <div class="task-desc">Sign off on pricing tiers and promotional packages</div>
+              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     
   </div>
   
   <script>
-    // Splash screen
-    setTimeout(() => document.getElementById('splash').classList.add('hidden'), 1500);
+    // Splash
+    setTimeout(() => document.getElementById('splash').classList.add('hidden'), 1200);
     
     // Tab switching
-    document.querySelectorAll('.month-tab').forEach(tab => {
+    document.querySelectorAll('.team-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.month-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.team-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.team-content').forEach(c => c.classList.remove('active'));
         tab.classList.add('active');
-        document.getElementById('month-' + tab.dataset.month).classList.add('active');
+        document.getElementById('team-' + tab.dataset.team).classList.add('active');
       });
     });
     
-    // Toggle task completion
+    // Toggle task
     function toggleTask(el) {
       el.classList.toggle('done');
       const title = el.nextElementSibling.querySelector('.task-title');
       title.classList.toggle('done');
-      if (el.classList.contains('done')) {
-        el.innerHTML = '✓';
-      } else {
-        el.innerHTML = '';
-      }
+      el.innerHTML = el.classList.contains('done') ? '✓' : '';
       updateProgress();
       saveProgress();
     }
     
-    // Update progress stats
+    // Update progress
     function updateProgress() {
-      const total = document.querySelectorAll('.task-checkbox').length;
-      const done = document.querySelectorAll('.task-checkbox.done').length;
-      const percent = Math.round((done / total) * 100);
+      const teams = { marketing: 0, warehouse: 0, fourthwall: 0, bob: 0 };
+      const teamTotals = { marketing: 0, warehouse: 0, fourthwall: 0, bob: 0 };
+      
+      document.querySelectorAll('.task-item').forEach(item => {
+        const team = item.dataset.team;
+        if (team && teamTotals[team] !== undefined) {
+          teamTotals[team]++;
+          if (item.querySelector('.task-checkbox.done')) teams[team]++;
+        }
+      });
+      
+      const total = Object.values(teamTotals).reduce((a, b) => a + b, 0);
+      const done = Object.values(teams).reduce((a, b) => a + b, 0);
+      const percent = total > 0 ? Math.round((done / total) * 100) : 0;
       
       document.getElementById('totalTasks').textContent = total;
       document.getElementById('completedTasks').textContent = done;
       document.getElementById('progressPercent').textContent = percent + '%';
+      document.getElementById('progressFill').style.width = percent + '%';
       
-      // Days to season (Nov 21, 2026)
+      // Team counts
+      document.getElementById('marketing-count').textContent = `${teams.marketing}/${teamTotals.marketing} done`;
+      document.getElementById('warehouse-count').textContent = `${teams.warehouse}/${teamTotals.warehouse} done`;
+      document.getElementById('fourthwall-count').textContent = `${teams.fourthwall}/${teamTotals.fourthwall} done`;
+      document.getElementById('bob-count').textContent = `${teams.bob}/${teamTotals.bob} done`;
+      
+      // Overview cards
+      document.getElementById('ov-marketing').textContent = `${teams.marketing}/${teamTotals.marketing}`;
+      document.getElementById('ov-warehouse').textContent = `${teams.warehouse}/${teamTotals.warehouse}`;
+      document.getElementById('ov-fourthwall').textContent = `${teams.fourthwall}/${teamTotals.fourthwall}`;
+      document.getElementById('ov-bob').textContent = `${teams.bob}/${teamTotals.bob}`;
+      
+      // Days to opening
       const opening = new Date('2026-11-21');
       const today = new Date();
       const days = Math.ceil((opening - today) / (1000 * 60 * 60 * 24));
       document.getElementById('daysToSeason').textContent = days;
     }
     
-    // Save progress to cloud
+    // Save/Load
     function saveProgress() {
       const completed = [];
-      document.querySelectorAll('.task-checkbox.done').forEach((el, i) => {
-        completed.push(i);
-      });
+      document.querySelectorAll('.task-checkbox.done').forEach((el, i) => completed.push(i));
       CloudSync.save('progress', { completed, updatedAt: new Date().toISOString() });
     }
     
-    // Load progress from cloud
     async function loadProgress() {
       const data = await CloudSync.load('progress');
       if (data && data.completed) {
@@ -929,7 +945,7 @@
           if (checkboxes[i]) {
             checkboxes[i].classList.add('done');
             checkboxes[i].innerHTML = '✓';
-            const title = checkboxes[i].nextElementSibling.querySelector('.task-title');
+            const title = checkboxes[i].nextElementSibling?.querySelector('.task-title');
             if (title) title.classList.add('done');
           }
         });
@@ -937,7 +953,6 @@
       updateProgress();
     }
     
-    // Initialize
     loadProgress();
   </script>
 </body>
