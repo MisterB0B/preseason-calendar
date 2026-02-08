@@ -15,27 +15,27 @@
         localStorage.setItem(APP_NAME + '_' + k, JSON.stringify(d));
         if (!this.online) return { synced: false };
         try {
-          const e = await fetch(`${SUPABASE_URL}/rest/v1/app_data?app_data=eq.${APP_NAME}&data_key=eq.${k}&select=id`, {
+          const e = await fetch(`${SUPABASE_URL}/rest/v1/app_data?app_name=eq.${APP_NAME}&data_key=eq.${k}&select=id`, {
             headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
           }).then(r => r.json());
           const m = e.length > 0 ? 'PATCH' : 'POST';
           const u = e.length > 0 ? `${SUPABASE_URL}/rest/v1/app_data?id=eq.${e[0].id}` : `${SUPABASE_URL}/rest/v1/app_data`;
           await fetch(u, {
             method: m,
-            headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify(e.length > 0 ? { data: d } : { app_data: APP_NAME, data_key: k, data: d })
+            headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+            body: JSON.stringify(e.length > 0 ? { data: d, updated_at: new Date().toISOString() } : { app_name: APP_NAME, data_key: k, data: d })
           });
           return { synced: true };
-        } catch (x) { return { synced: false }; }
+        } catch (x) { console.error('Sync error:', x); return { synced: false }; }
       },
       async load(k) {
         if (this.online) {
           try {
-            const r = await fetch(`${SUPABASE_URL}/rest/v1/app_data?app_data=eq.${APP_NAME}&data_key=eq.${k}&select=data`, {
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/app_data?app_name=eq.${APP_NAME}&data_key=eq.${k}&select=data`, {
               headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
             }).then(r => r.json());
             if (r.length > 0) { localStorage.setItem(APP_NAME + '_' + k, JSON.stringify(r[0].data)); return r[0].data; }
-          } catch (x) {}
+          } catch (x) { console.error('Load error:', x); }
         }
         const l = localStorage.getItem(APP_NAME + '_' + k);
         return l ? JSON.parse(l) : null;
@@ -65,6 +65,7 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      padding-bottom: 100px;
     }
     
     #splash {
@@ -84,6 +85,9 @@
       background: linear-gradient(135deg, var(--purple), var(--teal));
       padding: 20px;
       text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     .header h1 { font-size: 22px; font-weight: 800; }
     .header p { opacity: 0.9; font-size: 13px; margin-top: 4px; }
@@ -93,56 +97,56 @@
     /* Team Tabs */
     .team-tabs {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
     }
     .team-tab {
-      padding: 20px 16px;
+      padding: 12px 8px;
       background: var(--surface);
       border: 2px solid var(--border);
-      border-radius: 12px;
+      border-radius: 10px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .team-tab:hover { border-color: var(--purple); transform: translateY(-2px); }
+    .team-tab:hover { border-color: var(--purple); }
     .team-tab.active { border-color: var(--teal); background: rgba(6,214,160,0.1); }
-    .team-tab .icon { font-size: 32px; margin-bottom: 8px; }
-    .team-tab .name { font-weight: 700; font-size: 14px; }
-    .team-tab .count { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+    .team-tab .icon { font-size: 24px; margin-bottom: 4px; }
+    .team-tab .name { font-weight: 700; font-size: 12px; }
+    .team-tab .count { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
     
     /* Progress Bar */
     .progress-section {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
     .progress-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .progress-bar {
-      height: 12px;
+      height: 10px;
       background: var(--surface2);
-      border-radius: 6px;
+      border-radius: 5px;
       overflow: hidden;
     }
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--purple), var(--teal));
-      border-radius: 6px;
+      border-radius: 5px;
       transition: width 0.3s;
     }
     .progress-stats {
       display: flex;
       justify-content: space-between;
-      margin-top: 12px;
-      font-size: 13px;
+      margin-top: 10px;
+      font-size: 12px;
       color: var(--text-dim);
     }
     
@@ -153,12 +157,49 @@
     .team-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 24px;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
-    .team-header .icon { font-size: 48px; }
-    .team-header h2 { font-size: 24px; }
-    .team-header .desc { color: var(--text-dim); font-size: 14px; }
+    .team-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .team-header .icon { font-size: 36px; }
+    .team-header h2 { font-size: 20px; }
+    .team-header .desc { color: var(--text-dim); font-size: 13px; }
+    
+    /* Buttons */
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      color: #fff;
+    }
+    .btn-primary:hover { transform: scale(1.02); }
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--purple); }
+    .btn-danger {
+      background: rgba(239,68,68,0.2);
+      color: var(--red);
+    }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
     
     /* Month Sections */
     .month-section {
@@ -169,36 +210,42 @@
       overflow: hidden;
     }
     .month-header {
-      padding: 16px 20px;
+      padding: 14px 16px;
       background: var(--surface2);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
     }
-    .month-header h3 { font-size: 16px; }
-    .month-header .badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+    .month-header h3 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+    .month-tasks { padding: 12px; }
+    .month-tasks:empty::after {
+      content: 'No tasks yet. Click + to add one.';
+      display: block;
+      text-align: center;
+      color: var(--text-dim);
+      padding: 20px;
+      font-size: 13px;
     }
-    .month-tasks { padding: 16px 20px; }
     
     /* Task Item */
     .task-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 10px;
       padding: 12px;
       border-radius: 8px;
       margin-bottom: 8px;
       background: var(--bg);
       border: 1px solid var(--border);
+      transition: all 0.2s;
     }
+    .task-item:hover { border-color: var(--purple); }
+    .task-item.overdue { border-color: var(--red); background: rgba(239,68,68,0.05); }
+    .task-item.done { opacity: 0.6; }
+    
     .task-checkbox {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       border: 2px solid var(--border);
       border-radius: 6px;
       cursor: pointer;
@@ -207,7 +254,8 @@
       justify-content: center;
       flex-shrink: 0;
       transition: all 0.2s;
-      font-size: 14px;
+      font-size: 12px;
+      margin-top: 2px;
     }
     .task-checkbox:hover { border-color: var(--teal); }
     .task-checkbox.done {
@@ -215,66 +263,234 @@
       border-color: var(--green);
       color: #000;
     }
-    .task-content { flex: 1; }
-    .task-title { font-weight: 600; margin-bottom: 4px; }
-    .task-title.done { text-decoration: line-through; opacity: 0.6; }
-    .task-desc { font-size: 13px; color: var(--text-dim); }
-    .task-meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    
+    .task-content { flex: 1; min-width: 0; }
+    .task-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; word-wrap: break-word; }
+    .task-title.done { text-decoration: line-through; }
+    .task-desc { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; word-wrap: break-word; }
+    .task-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    
+    .task-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .task-item:hover .task-actions { opacity: 1; }
+    .task-action {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: var(--surface2);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .task-action:hover { background: var(--purple); }
     
     .badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
       font-weight: 600;
     }
     .badge-high { background: rgba(239,68,68,0.2); color: var(--red); }
     .badge-medium { background: rgba(249,115,22,0.2); color: var(--orange); }
-    .badge-done { background: rgba(34,197,94,0.2); color: var(--green); }
-    .badge-month { background: rgba(168,85,247,0.2); color: var(--purple); }
+    .badge-low { background: rgba(34,197,94,0.2); color: var(--green); }
+    .badge-date { background: rgba(59,130,246,0.2); color: var(--blue); }
+    .badge-assignee { background: rgba(168,85,247,0.2); color: var(--purple); }
     
     /* Overview Tab */
     .overview-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
     .overview-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
+    .overview-card:hover { border-color: var(--purple); transform: translateY(-2px); }
     .overview-card h3 {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-dim);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .overview-card .value {
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 800;
       background: linear-gradient(135deg, var(--purple), var(--teal));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.9);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.show .modal { transform: scale(1); }
+    
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { font-size: 18px; }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--surface2);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close:hover { background: var(--red); }
+    
+    .modal-body { padding: 20px; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-dim);
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface);
+      border: 1px solid var(--teal);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(168,85,247,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+    .fab:hover { transform: scale(1.1); }
+    
     @media (max-width: 768px) {
-      .team-tabs { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .team-tab { padding: 16px 12px; }
-      .team-tab .icon { font-size: 24px; }
-      .team-tab .name { font-size: 12px; }
+      .team-tabs { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+      .team-tab { padding: 10px 4px; }
+      .team-tab .icon { font-size: 20px; }
+      .team-tab .name { font-size: 10px; }
+      .team-tab .count { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .task-actions { opacity: 1; }
+      .overview-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
   <div id="splash">
-    <img src="logo.png" alt="Pre-Season Calendar" style="max-width: 80%; max-height: 50vh; margin-bottom: 16px;">
-    <div style="color: #8888a0; margin-top: 8px;">Loading 2026 roadmap...</div>
+    <div style="font-size: 64px; margin-bottom: 16px;">📅</div>
+    <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">Pre-Season Calendar</div>
+    <div style="color: #8888a0;">Loading 2026 roadmap...</div>
   </div>
   
   <div class="header">
     <h1>📅 Pre-Season Calendar 2026</h1>
-    <p>Team Roadmaps • Feb - Nov</p>
+    <p>Team Roadmaps • Feb - Nov • <span id="daysToSeason">287</span> days to opening</p>
   </div>
   
   <div class="container">
@@ -288,22 +504,22 @@
       <div class="team-tab" data-team="marketing">
         <div class="icon">📣</div>
         <div class="name">Marketing</div>
-        <div class="count" id="marketing-count">12 tasks</div>
+        <div class="count" id="marketing-count">0 tasks</div>
       </div>
       <div class="team-tab" data-team="warehouse">
         <div class="icon">🏭</div>
         <div class="name">Warehouse</div>
-        <div class="count" id="warehouse-count">10 tasks</div>
+        <div class="count" id="warehouse-count">0 tasks</div>
       </div>
       <div class="team-tab" data-team="fourthwall">
         <div class="icon">🎨</div>
-        <div class="name">4th Wall Digital</div>
-        <div class="count" id="fourthwall-count">8 tasks</div>
+        <div class="name">4th Wall</div>
+        <div class="count" id="fourthwall-count">0 tasks</div>
       </div>
       <div class="team-tab" data-team="bob">
         <div class="icon">👔</div>
         <div class="name">Bob</div>
-        <div class="count" id="bob-count">6 tasks</div>
+        <div class="count" id="bob-count">0 tasks</div>
       </div>
     </div>
     
@@ -317,556 +533,222 @@
         <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
       </div>
       <div class="progress-stats">
-        <span><span id="completedTasks">0</span> of <span id="totalTasks">36</span> tasks completed</span>
-        <span><span id="daysToSeason">287</span> days to opening</span>
+        <span><span id="completedTasks">0</span> of <span id="totalTasks">0</span> tasks completed</span>
+        <span id="overdueCount" style="color: var(--red);"></span>
       </div>
     </div>
     
     <!-- OVERVIEW -->
     <div class="team-content active" id="team-overview">
       <div class="overview-grid">
-        <div class="overview-card">
+        <div class="overview-card" onclick="switchToTeam('marketing')">
           <h3>📣 Marketing</h3>
-          <div class="value" id="ov-marketing">0/12</div>
+          <div class="value" id="ov-marketing">0/0</div>
         </div>
-        <div class="overview-card">
+        <div class="overview-card" onclick="switchToTeam('warehouse')">
           <h3>🏭 Warehouse</h3>
-          <div class="value" id="ov-warehouse">0/10</div>
+          <div class="value" id="ov-warehouse">0/0</div>
         </div>
-        <div class="overview-card">
+        <div class="overview-card" onclick="switchToTeam('fourthwall')">
           <h3>🎨 4th Wall Digital</h3>
-          <div class="value" id="ov-fourthwall">0/8</div>
+          <div class="value" id="ov-fourthwall">0/0</div>
         </div>
-        <div class="overview-card">
+        <div class="overview-card" onclick="switchToTeam('bob')">
           <h3>👔 Bob (Approvals)</h3>
-          <div class="value" id="ov-bob">0/6</div>
+          <div class="value" id="ov-bob">0/0</div>
         </div>
       </div>
       
-      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,214,160,0.1)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-        <h3 style="margin-bottom: 16px;">🎯 2026 Season Investment</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,214,160,0.1)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="margin-bottom: 12px;">🎯 2026 Season Investment</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
           <div>
-            <div style="font-size: 24px; font-weight: 700; color: var(--purple);">$38,000</div>
-            <div style="font-size: 13px; color: var(--text-dim);">4th Wall Digital</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--purple);">$38,000</div>
+            <div style="font-size: 12px; color: var(--text-dim);">4th Wall Digital</div>
           </div>
           <div>
-            <div style="font-size: 24px; font-weight: 700; color: var(--teal);">$252,000</div>
-            <div style="font-size: 13px; color: var(--text-dim);">Materials (8 venues)</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--teal);">$252,000</div>
+            <div style="font-size: 12px; color: var(--text-dim);">Materials (8 venues)</div>
           </div>
           <div>
-            <div style="font-size: 24px; font-weight: 700; color: var(--green);">$290,000</div>
-            <div style="font-size: 13px; color: var(--text-dim);">Total Investment</div>
-          </div>
-          <div>
-            <div style="font-size: 24px; font-weight: 700; color: var(--yellow);">600-800%</div>
-            <div style="font-size: 13px; color: var(--text-dim);">Projected ROI</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--green);">$290,000</div>
+            <div style="font-size: 12px; color: var(--text-dim);">Total Investment</div>
           </div>
         </div>
       </div>
       
-      <h3 style="margin-bottom: 16px;">📅 Timeline Overview</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-          <div style="font-weight: 700; color: var(--purple);">Feb</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Foundation</div>
+      <h3 style="margin-bottom: 12px;">⚠️ Overdue & Upcoming</h3>
+      <div id="urgentTasks" style="margin-bottom: 20px;"></div>
+      
+      <h3 style="margin-bottom: 12px;">📅 Timeline</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px;">
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-weight: 700; color: var(--purple); font-size: 14px;">Feb</div>
+          <div style="font-size: 10px; color: var(--text-dim);">Foundation</div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-          <div style="font-weight: 700; color: var(--purple);">Mar</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Content</div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-weight: 700; color: var(--purple); font-size: 14px;">Mar</div>
+          <div style="font-size: 10px; color: var(--text-dim);">Content</div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-          <div style="font-weight: 700; color: var(--purple);">Apr</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Integration</div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-weight: 700; color: var(--purple); font-size: 14px;">Apr</div>
+          <div style="font-size: 10px; color: var(--text-dim);">Finalize</div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-          <div style="font-weight: 700; color: var(--teal);">May</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Launch</div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-weight: 700; color: var(--teal); font-size: 14px;">May</div>
+          <div style="font-size: 10px; color: var(--text-dim);">Launch</div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-          <div style="font-weight: 700; color: var(--teal);">Jun</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Final Prep</div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-weight: 700; color: var(--teal); font-size: 14px;">Jun</div>
+          <div style="font-size: 10px; color: var(--text-dim);">Sales</div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-          <div style="font-weight: 700; color: var(--orange);">Jul-Oct</div>
-          <div style="font-size: 11px; color: var(--text-dim);">Build</div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-weight: 700; color: var(--orange); font-size: 14px;">Jul-Oct</div>
+          <div style="font-size: 10px; color: var(--text-dim);">Build</div>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--green); border-radius: 8px; padding: 12px; text-align: center;">
-          <div style="font-weight: 700; color: var(--green);">Nov</div>
-          <div style="font-size: 11px; color: var(--text-dim);">🎄 OPEN!</div>
+        <div style="background: var(--surface); border: 1px solid var(--green); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-weight: 700; color: var(--green); font-size: 14px;">Nov</div>
+          <div style="font-size: 10px; color: var(--text-dim);">🎄 OPEN!</div>
         </div>
       </div>
     </div>
     
-    <!-- MARKETING -->
-    <div class="team-content" id="team-marketing">
-      <div class="team-header">
-        <div class="icon">📣</div>
-        <div>
-          <h2>Marketing</h2>
-          <div class="desc">Social media, content, campaigns, website</div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 February</h3>
-          <span class="badge badge-month">Foundation</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Marketing Asset Organization</div>
-              <div class="task-desc">Create digital asset library, establish file naming conventions</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Website Branding Integration</div>
-              <div class="task-desc">Update website with new characters, brand kit, DJ Polar Ice, Pixel Penguin</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 March</h3>
-          <span class="badge badge-month">Content Creation</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">YouTube Channel Setup</div>
-              <div class="task-desc">Create channel (private), branding, thumbnail templates</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Festival Map Prototypes</div>
-              <div class="task-desc">Site-specific maps for all 8 venues with sponsorship zones</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 April</h3>
-          <span class="badge badge-month">Finalization</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Festival Map Finalization & Printing</div>
-              <div class="task-desc">Complete all 8 venue maps, get domestic & overseas printing quotes</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Website Final Review & Launch</div>
-              <div class="task-desc">Complete audit of all pages, verify assets, final approval</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 May</h3>
-          <span class="badge badge-month">Public Launch</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Social Media Content Launch</div>
-              <div class="task-desc">Go live on YouTube, TikTok, Instagram. Monitor engagement daily.</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Early Bird Sales Planning</div>
-              <div class="task-desc">Pricing tiers, promotional packages, marketing materials for June launch</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Viral Content Creation</div>
-              <div class="task-desc">Short viral sequences, @htown_frankie style content for organic reach</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 June</h3>
-          <span class="badge badge-month">Sales Launch</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Early Bird Ticket Sales Launch</div>
-              <div class="task-desc">Open ticket sales with promotional pricing</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="marketing">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">App Audio Content</div>
-              <div class="task-desc">Pre-arrival audio, queue entertainment, sponsorship segments</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- WAREHOUSE -->
-    <div class="team-content" id="team-warehouse">
-      <div class="team-header">
-        <div class="icon">🏭</div>
-        <div>
-          <h2>Warehouse / Operations</h2>
-          <div class="desc">Build, props, tent improvements, installations</div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 February</h3>
-          <span class="badge badge-month">Planning</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">OKC Park Layout Design</div>
-              <div class="task-desc">Traffic flow, emergency exits, tent positioning, show roadmap</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Themed Area Development (Returning Venues)</div>
-              <div class="task-desc">Audit existing inventory, optimize prop placement for 7 venues</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Tent Experience Enhancement Design</div>
-              <div class="task-desc">Grand entrance pixel screens, rolling shelving, popcorn carts</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 April</h3>
-          <span class="badge badge-month">Procurement</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Material Procurement Start</div>
-              <div class="task-desc">Order DJ booths ($60K), pixel signage ($8K), tent screens ($80K), displays ($40K)</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 May</h3>
-          <span class="badge badge-month">Manufacturing</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Tent Improvement Manufacturing</div>
-              <div class="task-desc">Pixel screens, rolling shelving units, equipment carts</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Photo Op Area Construction</div>
-              <div class="task-desc">Build backdrops, install lighting at all venues</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Sequence Upload to Venues</div>
-              <div class="task-desc">Upload new & existing tracks to all venue props (continues through July)</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 July - October</h3>
-          <span class="badge badge-month">Build Season</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Venue Installations</div>
-              <div class="task-desc">Deploy teams, install props, electrical & pixel testing at all 8 sites</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="warehouse">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Final System Testing</div>
-              <div class="task-desc">Full show testing, troubleshooting, QA at all venues</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 4TH WALL DIGITAL -->
-    <div class="team-content" id="team-fourthwall">
-      <div class="team-header">
-        <div class="icon">🎨</div>
-        <div>
-          <h2>4th Wall Digital</h2>
-          <div class="desc">Character development, animation, voice, creative</div>
-        </div>
-      </div>
-      
-      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.1)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-size: 14px; color: var(--text-dim);">Contract Value</div>
-            <div style="font-size: 28px; font-weight: 700; color: var(--purple);">$38,000</div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-size: 14px; color: var(--text-dim);">Deadline</div>
-            <div style="font-size: 18px; font-weight: 700; color: var(--teal);">June 2026</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 February</h3>
-          <span class="badge badge-month">Character Dev</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">DJ Polar Ice Photo Shoot</div>
-              <div class="task-desc">Professional mascot photos for facial animation & marketing assets</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Lip-Sync & Gesture Animation</div>
-              <div class="task-desc">Phoneme library for English/Spanish, gesture animations</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Bilingual Voice Creation</div>
-              <div class="task-desc">Voice actor auditions, record core phrases English/Spanish</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Pixel Penguin Character Design</div>
-              <div class="task-desc">5-7 concept variations, final 3D model and rigging</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 March</h3>
-          <span class="badge badge-month">Content</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">DJ Polar Ice Storybook</div>
-              <div class="task-desc">Origin story narrative, teaser content for maps</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Theme Song / Jingle</div>
-              <div class="task-desc">Compose memorable audio branding, instrumental & vocal versions</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Character Dialogue Scripts</div>
-              <div class="task-desc">Bumper track scripts, between-song transitions, bilingual</div>
-              <div class="task-meta"><span class="badge badge-medium">MEDIUM</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 April - June</h3>
-          <span class="badge badge-month">Delivery</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="fourthwall">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Complete Content Suite Delivery</div>
-              <div class="task-desc">All character digital twins, RVC voice & LoRA visual models, brand identity system</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- BOB -->
-    <div class="team-content" id="team-bob">
-      <div class="team-header">
-        <div class="icon">👔</div>
-        <div>
-          <h2>Bob (Executive / Approvals)</h2>
-          <div class="desc">Final approvals, key decisions, vendor management</div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 February</h3>
-          <span class="badge badge-month">Kickoff</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="bob">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Approve Pixel Penguin Final Design</div>
-              <div class="task-desc">Review 5-7 concepts, select final character design</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="bob">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Approve OKC Layout</div>
-              <div class="task-desc">Review traffic flow, emergency exits, tent positioning</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 April</h3>
-          <span class="badge badge-month">Reviews</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="bob">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Branding Consistency Sign-off</div>
-              <div class="task-desc">Final review of all graphics, colors, character representations</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="bob">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Approve Festival Map Printing</div>
-              <div class="task-desc">Review quotes, select vendor (domestic vs overseas)</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-          <div class="task-item" data-team="bob">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Website Launch Approval</div>
-              <div class="task-desc">Final sign-off on updated website with new branding</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="month-section">
-        <div class="month-header">
-          <h3>📅 May - June</h3>
-          <span class="badge badge-month">Launch</span>
-        </div>
-        <div class="month-tasks">
-          <div class="task-item" data-team="bob">
-            <div class="task-checkbox" onclick="toggleTask(this)"></div>
-            <div class="task-content">
-              <div class="task-title">Approve Early Bird Pricing</div>
-              <div class="task-desc">Sign off on pricing tiers and promotional packages</div>
-              <div class="task-meta"><span class="badge badge-high">HIGH</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
+    <!-- Team content containers -->
+    <div class="team-content" id="team-marketing"></div>
+    <div class="team-content" id="team-warehouse"></div>
+    <div class="team-content" id="team-fourthwall"></div>
+    <div class="team-content" id="team-bob"></div>
   </div>
   
+  <!-- FAB -->
+  <button class="fab" onclick="openAddModal()" title="Add Task">+</button>
+  
+  <!-- Task Modal -->
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Task</h3>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Task Title *</label>
+          <input type="text" id="taskTitle" placeholder="What needs to be done?">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="taskDesc" placeholder="Additional details..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Team *</label>
+            <select id="taskTeam">
+              <option value="marketing">📣 Marketing</option>
+              <option value="warehouse">🏭 Warehouse</option>
+              <option value="fourthwall">🎨 4th Wall Digital</option>
+              <option value="bob">👔 Bob</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Month *</label>
+            <select id="taskMonth">
+              <option value="feb">February</option>
+              <option value="mar">March</option>
+              <option value="apr">April</option>
+              <option value="may">May</option>
+              <option value="jun">June</option>
+              <option value="jul">July</option>
+              <option value="aug">August</option>
+              <option value="sep">September</option>
+              <option value="oct">October</option>
+              <option value="nov">November</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="taskPriority">
+              <option value="high">🔴 High</option>
+              <option value="medium">🟠 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Due Date</label>
+            <input type="date" id="taskDue">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Assigned To</label>
+          <input type="text" id="taskAssignee" placeholder="Name or team member">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="taskNotes" placeholder="Internal notes..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger" id="deleteBtn" onclick="deleteTask()" style="display: none;">Delete</button>
+        <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+  
   <script>
+    // State
+    let tasks = [];
+    let editingTaskId = null;
+    let currentTeam = 'overview';
+    
+    const MONTHS = {
+      feb: { name: 'February', theme: 'Foundation' },
+      mar: { name: 'March', theme: 'Content Creation' },
+      apr: { name: 'April', theme: 'Finalization' },
+      may: { name: 'May', theme: 'Public Launch' },
+      jun: { name: 'June', theme: 'Sales Launch' },
+      jul: { name: 'July', theme: 'Build Season' },
+      aug: { name: 'August', theme: 'Build Season' },
+      sep: { name: 'September', theme: 'Build Season' },
+      oct: { name: 'October', theme: 'Final Prep' },
+      nov: { name: 'November', theme: '🎄 SHOWTIME!' }
+    };
+    
+    const TEAMS = {
+      marketing: { icon: '📣', name: 'Marketing', desc: 'Social media, content, campaigns, website' },
+      warehouse: { icon: '🏭', name: 'Warehouse / Operations', desc: 'Build, props, tent improvements, installations' },
+      fourthwall: { icon: '🎨', name: '4th Wall Digital', desc: 'Character development, animation, voice, creative' },
+      bob: { icon: '👔', name: 'Bob (Executive / Approvals)', desc: 'Final approvals, key decisions, vendor management' }
+    };
+    
+    // Default tasks to seed initially
+    const DEFAULT_TASKS = [
+      { id: 1, title: 'Marketing Asset Organization', desc: 'Create digital asset library, establish file naming conventions', team: 'marketing', month: 'feb', priority: 'medium', done: false },
+      { id: 2, title: 'Website Branding Integration', desc: 'Update website with new characters, brand kit, DJ Polar Ice, Pixel Penguin', team: 'marketing', month: 'feb', priority: 'high', done: false },
+      { id: 3, title: 'YouTube Channel Setup', desc: 'Create channel (private), branding, thumbnail templates', team: 'marketing', month: 'mar', priority: 'medium', done: false },
+      { id: 4, title: 'Festival Map Prototypes', desc: 'Site-specific maps for all 8 venues with sponsorship zones', team: 'marketing', month: 'mar', priority: 'high', done: false },
+      { id: 5, title: 'Social Media Content Launch', desc: 'Go live on YouTube, TikTok, Instagram. Monitor engagement daily.', team: 'marketing', month: 'may', priority: 'high', done: false },
+      { id: 6, title: 'Early Bird Ticket Sales Launch', desc: 'Open ticket sales with promotional pricing', team: 'marketing', month: 'jun', priority: 'high', done: false },
+      { id: 7, title: 'OKC Park Layout Design', desc: 'Traffic flow, emergency exits, tent positioning, show roadmap', team: 'warehouse', month: 'feb', priority: 'high', done: false },
+      { id: 8, title: 'Tent Experience Enhancement Design', desc: 'Grand entrance pixel screens, rolling shelving, popcorn carts', team: 'warehouse', month: 'feb', priority: 'high', done: false },
+      { id: 9, title: 'Material Procurement Start', desc: 'Order DJ booths ($60K), pixel signage ($8K), tent screens ($80K), displays ($40K)', team: 'warehouse', month: 'apr', priority: 'high', done: false },
+      { id: 10, title: 'Venue Installations', desc: 'Deploy teams, install props, electrical & pixel testing at all 8 sites', team: 'warehouse', month: 'jul', priority: 'high', done: false },
+      { id: 11, title: 'DJ Polar Ice Photo Shoot', desc: 'Professional mascot photos for facial animation & marketing assets', team: 'fourthwall', month: 'feb', priority: 'high', done: false },
+      { id: 12, title: 'Pixel Penguin Character Design', desc: '5-7 concept variations, final 3D model and rigging', team: 'fourthwall', month: 'feb', priority: 'high', done: false },
+      { id: 13, title: 'Bilingual Voice Creation', desc: 'Voice actor auditions, record core phrases English/Spanish', team: 'fourthwall', month: 'feb', priority: 'high', done: false },
+      { id: 14, title: 'Theme Song / Jingle', desc: 'Compose memorable audio branding, instrumental & vocal versions', team: 'fourthwall', month: 'mar', priority: 'high', done: false },
+      { id: 15, title: 'Approve Pixel Penguin Final Design', desc: 'Review 5-7 concepts, select final character design', team: 'bob', month: 'feb', priority: 'high', done: false },
+      { id: 16, title: 'Approve OKC Layout', desc: 'Review traffic flow, emergency exits, tent positioning', team: 'bob', month: 'feb', priority: 'high', done: false },
+      { id: 17, title: 'Website Launch Approval', desc: 'Final sign-off on updated website with new branding', team: 'bob', month: 'apr', priority: 'high', done: false },
+      { id: 18, title: 'Approve Early Bird Pricing', desc: 'Sign off on pricing tiers and promotional packages', team: 'bob', month: 'may', priority: 'high', done: false },
+    ];
+    
     // Splash
-    setTimeout(() => document.getElementById('splash').classList.add('hidden'), 1200);
+    setTimeout(() => document.getElementById('splash').classList.add('hidden'), 800);
     
     // Tab switching
     document.querySelectorAll('.team-tab').forEach(tab => {
@@ -874,53 +756,162 @@
         document.querySelectorAll('.team-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.team-content').forEach(c => c.classList.remove('active'));
         tab.classList.add('active');
-        document.getElementById('team-' + tab.dataset.team).classList.add('active');
+        currentTeam = tab.dataset.team;
+        document.getElementById('team-' + currentTeam).classList.add('active');
       });
     });
     
-    // Toggle task
-    function toggleTask(el) {
-      el.classList.toggle('done');
-      const title = el.nextElementSibling.querySelector('.task-title');
-      title.classList.toggle('done');
-      el.innerHTML = el.classList.contains('done') ? '✓' : '';
-      updateProgress();
-      saveProgress();
+    function switchToTeam(team) {
+      document.querySelectorAll('.team-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.team === team);
+      });
+      document.querySelectorAll('.team-content').forEach(c => c.classList.remove('active'));
+      currentTeam = team;
+      document.getElementById('team-' + team).classList.add('active');
     }
     
-    // Update progress
-    function updateProgress() {
-      const teams = { marketing: 0, warehouse: 0, fourthwall: 0, bob: 0 };
-      const teamTotals = { marketing: 0, warehouse: 0, fourthwall: 0, bob: 0 };
-      
-      document.querySelectorAll('.task-item').forEach(item => {
-        const team = item.dataset.team;
-        if (team && teamTotals[team] !== undefined) {
-          teamTotals[team]++;
-          if (item.querySelector('.task-checkbox.done')) teams[team]++;
-        }
+    // Render
+    function render() {
+      // Render each team
+      Object.keys(TEAMS).forEach(teamKey => {
+        const container = document.getElementById('team-' + teamKey);
+        const teamTasks = tasks.filter(t => t.team === teamKey);
+        const team = TEAMS[teamKey];
+        
+        // Group by month
+        const byMonth = {};
+        Object.keys(MONTHS).forEach(m => byMonth[m] = []);
+        teamTasks.forEach(t => {
+          if (byMonth[t.month]) byMonth[t.month].push(t);
+        });
+        
+        let html = `
+          <div class="team-header">
+            <div class="team-header-left">
+              <div class="icon">${team.icon}</div>
+              <div>
+                <h2>${team.name}</h2>
+                <div class="desc">${team.desc}</div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        Object.keys(MONTHS).forEach(monthKey => {
+          const monthTasks = byMonth[monthKey];
+          if (monthTasks.length === 0 && !['feb', 'mar', 'apr', 'may', 'jun'].includes(monthKey)) return;
+          
+          const month = MONTHS[monthKey];
+          const done = monthTasks.filter(t => t.done).length;
+          
+          html += `
+            <div class="month-section">
+              <div class="month-header">
+                <h3>📅 ${month.name} <span style="font-weight: 400; color: var(--text-dim); font-size: 13px;">(${done}/${monthTasks.length})</span></h3>
+                <button class="btn btn-sm btn-secondary" onclick="openAddModal('${teamKey}', '${monthKey}')">+ Add</button>
+              </div>
+              <div class="month-tasks" id="tasks-${teamKey}-${monthKey}">
+          `;
+          
+          monthTasks.sort((a, b) => {
+            if (a.done !== b.done) return a.done ? 1 : -1;
+            const p = { high: 0, medium: 1, low: 2 };
+            return (p[a.priority] || 1) - (p[b.priority] || 1);
+          });
+          
+          monthTasks.forEach(task => {
+            html += renderTask(task);
+          });
+          
+          html += `</div></div>`;
+        });
+        
+        container.innerHTML = html;
       });
       
-      const total = Object.values(teamTotals).reduce((a, b) => a + b, 0);
-      const done = Object.values(teams).reduce((a, b) => a + b, 0);
+      updateStats();
+      renderUrgent();
+    }
+    
+    function renderTask(task) {
+      const isOverdue = task.due && !task.done && new Date(task.due) < new Date();
+      return `
+        <div class="task-item ${task.done ? 'done' : ''} ${isOverdue ? 'overdue' : ''}" data-id="${task.id}">
+          <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">${task.done ? '✓' : ''}</div>
+          <div class="task-content">
+            <div class="task-title ${task.done ? 'done' : ''}">${escapeHtml(task.title)}</div>
+            ${task.desc ? `<div class="task-desc">${escapeHtml(task.desc)}</div>` : ''}
+            <div class="task-meta">
+              <span class="badge badge-${task.priority || 'medium'}">${(task.priority || 'medium').toUpperCase()}</span>
+              ${task.due ? `<span class="badge badge-date">📅 ${formatDate(task.due)}</span>` : ''}
+              ${task.assignee ? `<span class="badge badge-assignee">👤 ${escapeHtml(task.assignee)}</span>` : ''}
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="task-action" onclick="editTask(${task.id})" title="Edit">✏️</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderUrgent() {
+      const urgent = tasks.filter(t => !t.done).filter(t => {
+        if (t.priority === 'high') return true;
+        if (t.due) {
+          const d = new Date(t.due);
+          const diff = (d - new Date()) / (1000 * 60 * 60 * 24);
+          return diff <= 14;
+        }
+        return false;
+      }).slice(0, 6);
+      
+      const container = document.getElementById('urgentTasks');
+      if (urgent.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-dim); font-size: 13px; padding: 12px; background: var(--surface); border-radius: 8px;">No urgent tasks! 🎉</div>';
+        return;
+      }
+      
+      container.innerHTML = urgent.map(t => `
+        <div style="background: var(--surface); border: 1px solid ${t.due && new Date(t.due) < new Date() ? 'var(--red)' : 'var(--border)'}; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">${TEAMS[t.team]?.icon || '📋'}</span>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; font-size: 13px;">${escapeHtml(t.title)}</div>
+            <div style="font-size: 11px; color: var(--text-dim);">${MONTHS[t.month]?.name || t.month} ${t.due ? '• Due ' + formatDate(t.due) : ''}</div>
+          </div>
+          <span class="badge badge-${t.priority}">${t.priority?.toUpperCase()}</span>
+        </div>
+      `).join('');
+    }
+    
+    function updateStats() {
+      const teams = { marketing: { done: 0, total: 0 }, warehouse: { done: 0, total: 0 }, fourthwall: { done: 0, total: 0 }, bob: { done: 0, total: 0 } };
+      let overdue = 0;
+      
+      tasks.forEach(t => {
+        if (teams[t.team]) {
+          teams[t.team].total++;
+          if (t.done) teams[t.team].done++;
+        }
+        if (!t.done && t.due && new Date(t.due) < new Date()) overdue++;
+      });
+      
+      const total = tasks.length;
+      const done = tasks.filter(t => t.done).length;
       const percent = total > 0 ? Math.round((done / total) * 100) : 0;
       
       document.getElementById('totalTasks').textContent = total;
       document.getElementById('completedTasks').textContent = done;
       document.getElementById('progressPercent').textContent = percent + '%';
       document.getElementById('progressFill').style.width = percent + '%';
+      document.getElementById('overdueCount').textContent = overdue > 0 ? `⚠️ ${overdue} overdue` : '';
       
       // Team counts
-      document.getElementById('marketing-count').textContent = `${teams.marketing}/${teamTotals.marketing} done`;
-      document.getElementById('warehouse-count').textContent = `${teams.warehouse}/${teamTotals.warehouse} done`;
-      document.getElementById('fourthwall-count').textContent = `${teams.fourthwall}/${teamTotals.fourthwall} done`;
-      document.getElementById('bob-count').textContent = `${teams.bob}/${teamTotals.bob} done`;
-      
-      // Overview cards
-      document.getElementById('ov-marketing').textContent = `${teams.marketing}/${teamTotals.marketing}`;
-      document.getElementById('ov-warehouse').textContent = `${teams.warehouse}/${teamTotals.warehouse}`;
-      document.getElementById('ov-fourthwall').textContent = `${teams.fourthwall}/${teamTotals.fourthwall}`;
-      document.getElementById('ov-bob').textContent = `${teams.bob}/${teamTotals.bob}`;
+      Object.keys(teams).forEach(k => {
+        const el = document.getElementById(k + '-count');
+        if (el) el.textContent = `${teams[k].done}/${teams[k].total}`;
+        const ov = document.getElementById('ov-' + k);
+        if (ov) ov.textContent = `${teams[k].done}/${teams[k].total}`;
+      });
       
       // Days to opening
       const opening = new Date('2026-11-21');
@@ -929,30 +920,152 @@
       document.getElementById('daysToSeason').textContent = days;
     }
     
-    // Save/Load
-    function saveProgress() {
-      const completed = [];
-      document.querySelectorAll('.task-checkbox.done').forEach((el, i) => completed.push(i));
-      CloudSync.save('progress', { completed, updatedAt: new Date().toISOString() });
-    }
-    
-    async function loadProgress() {
-      const data = await CloudSync.load('progress');
-      if (data && data.completed) {
-        const checkboxes = document.querySelectorAll('.task-checkbox');
-        data.completed.forEach(i => {
-          if (checkboxes[i]) {
-            checkboxes[i].classList.add('done');
-            checkboxes[i].innerHTML = '✓';
-            const title = checkboxes[i].nextElementSibling?.querySelector('.task-title');
-            if (title) title.classList.add('done');
-          }
-        });
+    // Task actions
+    function toggleTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.done = !task.done;
+        task.updatedAt = new Date().toISOString();
+        saveTasks();
+        render();
+        showToast(task.done ? '✅ Task completed!' : 'Task reopened');
       }
-      updateProgress();
     }
     
-    loadProgress();
+    function openAddModal(team, month) {
+      editingTaskId = null;
+      document.getElementById('modalTitle').textContent = 'Add Task';
+      document.getElementById('deleteBtn').style.display = 'none';
+      document.getElementById('taskTitle').value = '';
+      document.getElementById('taskDesc').value = '';
+      document.getElementById('taskTeam').value = team || (currentTeam !== 'overview' ? currentTeam : 'marketing');
+      document.getElementById('taskMonth').value = month || 'feb';
+      document.getElementById('taskPriority').value = 'medium';
+      document.getElementById('taskDue').value = '';
+      document.getElementById('taskAssignee').value = '';
+      document.getElementById('taskNotes').value = '';
+      document.getElementById('taskModal').classList.add('show');
+      document.getElementById('taskTitle').focus();
+    }
+    
+    function editTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      
+      editingTaskId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Task';
+      document.getElementById('deleteBtn').style.display = 'block';
+      document.getElementById('taskTitle').value = task.title || '';
+      document.getElementById('taskDesc').value = task.desc || '';
+      document.getElementById('taskTeam').value = task.team || 'marketing';
+      document.getElementById('taskMonth').value = task.month || 'feb';
+      document.getElementById('taskPriority').value = task.priority || 'medium';
+      document.getElementById('taskDue').value = task.due || '';
+      document.getElementById('taskAssignee').value = task.assignee || '';
+      document.getElementById('taskNotes').value = task.notes || '';
+      document.getElementById('taskModal').classList.add('show');
+    }
+    
+    function closeModal() {
+      document.getElementById('taskModal').classList.remove('show');
+      editingTaskId = null;
+    }
+    
+    function saveTask() {
+      const title = document.getElementById('taskTitle').value.trim();
+      if (!title) {
+        showToast('⚠️ Title is required');
+        return;
+      }
+      
+      const taskData = {
+        title,
+        desc: document.getElementById('taskDesc').value.trim(),
+        team: document.getElementById('taskTeam').value,
+        month: document.getElementById('taskMonth').value,
+        priority: document.getElementById('taskPriority').value,
+        due: document.getElementById('taskDue').value || null,
+        assignee: document.getElementById('taskAssignee').value.trim() || null,
+        notes: document.getElementById('taskNotes').value.trim() || null,
+        updatedAt: new Date().toISOString()
+      };
+      
+      if (editingTaskId) {
+        const idx = tasks.findIndex(t => t.id === editingTaskId);
+        if (idx >= 0) {
+          tasks[idx] = { ...tasks[idx], ...taskData };
+        }
+        showToast('✅ Task updated');
+      } else {
+        taskData.id = Date.now();
+        taskData.done = false;
+        taskData.createdAt = new Date().toISOString();
+        tasks.push(taskData);
+        showToast('✅ Task added');
+      }
+      
+      saveTasks();
+      closeModal();
+      render();
+    }
+    
+    function deleteTask() {
+      if (!editingTaskId) return;
+      if (!confirm('Delete this task?')) return;
+      
+      tasks = tasks.filter(t => t.id !== editingTaskId);
+      saveTasks();
+      closeModal();
+      render();
+      showToast('🗑️ Task deleted');
+    }
+    
+    // Persistence
+    async function saveTasks() {
+      const result = await CloudSync.save('tasks', tasks);
+      if (result.synced) {
+        console.log('Synced to cloud');
+      }
+    }
+    
+    async function loadTasks() {
+      const data = await CloudSync.load('tasks');
+      if (data && Array.isArray(data) && data.length > 0) {
+        tasks = data;
+      } else {
+        // First time - seed with defaults
+        tasks = DEFAULT_TASKS.map(t => ({ ...t, createdAt: new Date().toISOString() }));
+        await saveTasks();
+      }
+      render();
+    }
+    
+    // Utils
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+    
+    // Init
+    loadTasks();
   </script>
 </body>
 </html>
