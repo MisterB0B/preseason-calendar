@@ -39,6 +39,18 @@
         }
         const l = localStorage.getItem(APP_NAME + '_' + k);
         return l ? JSON.parse(l) : null;
+      },
+      
+      // Load from shared key (cross-app data)
+      async loadShared(sharedKey) {
+        if (!this.online) return null;
+        try {
+          const r = await fetch(`${SUPABASE_URL}/rest/v1/app_data?app_name=eq.shared&data_key=eq.${sharedKey}&select=data`, {
+            headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+          }).then(r => r.json());
+          if (r.length > 0) return r[0].data;
+        } catch (x) { console.error('Shared load error:', x); }
+        return null;
       }
     };
   </script>
@@ -560,22 +572,26 @@
         </div>
       </div>
       
-      <div style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,214,160,0.1)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="margin-bottom: 12px;">🎯 2026 Season Investment</h3>
+      <div id="budgetSection" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,214,160,0.1)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3>🎯 2026 Season Investment</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadBudgetData()" title="Refresh from Budget Tracker">🔄</button>
+        </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
           <div>
-            <div style="font-size: 20px; font-weight: 700; color: var(--purple);">$38,000</div>
+            <div id="budgetMarketing" style="font-size: 20px; font-weight: 700; color: var(--purple);">$38,000</div>
             <div style="font-size: 12px; color: var(--text-dim);">4th Wall Digital</div>
           </div>
           <div>
-            <div style="font-size: 20px; font-weight: 700; color: var(--teal);">$252,000</div>
+            <div id="budgetMaterials" style="font-size: 20px; font-weight: 700; color: var(--teal);">$252,000</div>
             <div style="font-size: 12px; color: var(--text-dim);">Materials (8 venues)</div>
           </div>
           <div>
-            <div style="font-size: 20px; font-weight: 700; color: var(--green);">$290,000</div>
+            <div id="budgetTotal" style="font-size: 20px; font-weight: 700; color: var(--green);">$290,000</div>
             <div style="font-size: 12px; color: var(--text-dim);">Total Investment</div>
           </div>
         </div>
+        <div id="budgetSource" style="font-size: 10px; color: var(--text-dim); margin-top: 10px; text-align: right;"></div>
       </div>
       
       <h3 style="margin-bottom: 12px;">⚠️ Overdue & Upcoming</h3>
@@ -1152,8 +1168,44 @@
       });
     }
     
+    // Load budget data from Budget Tracker (shared key)
+    async function loadBudgetData() {
+      const data = await CloudSync.loadShared('budget_summary');
+      if (data) {
+        // Update display
+        const marketingEl = document.getElementById('budgetMarketing');
+        const materialsEl = document.getElementById('budgetMaterials');
+        const totalEl = document.getElementById('budgetTotal');
+        const sourceEl = document.getElementById('budgetSource');
+        
+        if (data.marketing?.budget) {
+          marketingEl.textContent = '$' + formatCurrency(data.marketing.budget);
+        }
+        if (data.materials?.budget) {
+          materialsEl.textContent = '$' + formatCurrency(data.materials.budget);
+        }
+        if (data.totalBudget) {
+          totalEl.textContent = '$' + formatCurrency(data.totalBudget);
+        }
+        
+        if (data.updatedAt) {
+          const d = new Date(data.updatedAt);
+          sourceEl.textContent = '📊 From Budget Tracker • Updated ' + d.toLocaleDateString();
+        }
+        
+        console.log('Loaded budget data from Budget Tracker');
+      } else {
+        document.getElementById('budgetSource').textContent = '⚠️ Using defaults • Open Budget Tracker to sync';
+      }
+    }
+    
+    function formatCurrency(num) {
+      return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+    
     // Init
     loadTasks();
+    loadBudgetData();
   </script>
 </body>
 </html>
