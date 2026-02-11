@@ -495,6 +495,11 @@
       .overview-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
+  <script src="https://thelightparkops.com/shared/user-presence.js"></script>
+  <script src="supabase-sync.js"></script>
+  <script src="/shared/supabase-auth.js"></script>
+  <script src="/shared/activity-logger.js"></script>
+  <script src="/shared/auth-gate.js" data-app="Preseason Calendar" data-icon="📅"></script>
 </head>
 <body>
   <div id="splash">
@@ -503,9 +508,16 @@
     <div style="color: #8888a0;">Loading 2026 roadmap...</div>
   </div>
   
-  <div class="header">
+  <div class="header" style="position: relative;">
+    <a href="https://thelightparkops.com" style="position: absolute; top: 20px; left: 20px; color: #a855f7; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.color='#06d6a0'" onmouseout="this.style.color='#a855f7'">
+      ← Dashboard
+    </a>
     <h1>📅 Pre-Season Calendar 2026</h1>
     <p>Team Roadmaps • Feb - Nov • <span id="daysToSeason">287</span> days to opening</p>
+    <div style="display: flex; align-items: center; gap: 12px; font-size: 11px; opacity: 0.8; margin-top: 4px;">
+      <span id="syncStatus">☁️ Cloud sync enabled</span>
+      <div id="presenceIndicator" style="display: none; align-items: center; gap: 6px; padding: 3px 10px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; font-size: 11px; color: #a855f7;"></div>
+    </div>
   </div>
   
   <div class="container">
@@ -655,8 +667,16 @@
     <div class="team-content" id="team-bob"></div>
   </div>
   
+  <!-- Save & Sync FAB -->
+  <button class="save-sync-fab" id="saveSyncBtn" onclick="manualSync()" title="Save & sync all tasks to cloud">
+    <span class="icon">💾</span>
+    <span class="text">Save & Sync</span>
+  </button>
+  
   <!-- FAB -->
   <button class="fab" onclick="openAddModal()" title="Add Task">+</button>
+  
+  <link rel="stylesheet" href="https://thelightparkops.com/shared/save-sync-fab.css">
   
   <!-- Task Modal -->
   <div class="modal-overlay" id="taskModal">
@@ -1059,19 +1079,52 @@
     // Persistence
     async function saveTasks() {
       const result = await CloudSync.save('tasks', tasks);
+      const statusEl = document.getElementById('syncStatus');
       if (result.synced) {
-        console.log('Synced to cloud');
+        console.log('✅ Synced to cloud');
+        if (statusEl) statusEl.textContent = '☁️ Synced ' + new Date().toLocaleTimeString();
+      } else {
+        console.log('⚠️ Saved locally (offline)');
+        if (statusEl) statusEl.textContent = '📱 Saved locally (will sync when online)';
+      }
+    }
+    
+    async function manualSync() {
+      const btn = document.getElementById('saveSyncBtn');
+      if (!btn) return;
+      
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<span class="icon">⏳</span><span class="text">Syncing...</span>';
+      btn.disabled = true;
+      
+      try {
+        await saveTasks();
+        btn.innerHTML = '<span class="icon">✅</span><span class="text">Synced!</span>';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+        }, 2000);
+      } catch (err) {
+        btn.innerHTML = '<span class="icon">❌</span><span class="text">Error</span>';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+        }, 2000);
       }
     }
     
     async function loadTasks() {
+      const statusEl = document.getElementById('syncStatus');
       const data = await CloudSync.load('tasks');
       if (data && Array.isArray(data) && data.length > 0) {
         tasks = data;
+        if (statusEl) statusEl.textContent = '☁️ Loaded from cloud';
+        console.log('✅ Loaded ' + tasks.length + ' tasks from cloud');
       } else {
         // First time - seed with defaults
         tasks = DEFAULT_TASKS.map(t => ({ ...t, createdAt: new Date().toISOString() }));
         await saveTasks();
+        if (statusEl) statusEl.textContent = '☁️ Initial setup complete';
       }
       render();
     }
@@ -1208,6 +1261,21 @@
     // Init
     loadTasks();
     loadBudgetData();
+    
+    // Initialize user presence (DISABLED until proper auth)
+    // Uncomment when ready to enable:
+    /*
+    if (typeof UserPresence !== 'undefined') {
+      const userName = localStorage.getItem('user_name') || 'Demo User';
+      
+      const presence = new UserPresence('preseason_calendar', userName);
+      presence.start();
+      
+      presence.onUsersChange = (users) => {
+        presence.renderPresenceIndicator('presenceIndicator');
+      };
+    }
+    */
   </script>
 </body>
 </html>
